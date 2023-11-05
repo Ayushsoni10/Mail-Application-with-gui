@@ -1,70 +1,62 @@
-# Mail Application With GUI Using Python.
-import tkinter
-import tkinter as tk
 import smtplib
+from tkinter import Tk, Label, Entry, Text, Button, END
 
-class MailApp:
-    def __init__(self, master):
-        self.master = master
-        master.title("Sagar's Mail Application")
-        tkinter.Tk.config(master, background="lightgray")
+class EmailClient:
+    def __init__(self, window):
+        self.window = window
+        window.title("Email Client")
 
-        # Create the UI
-        self.from_label = tk.Label(master, text="From:       ", background="lightgray")
-        self.from_label.grid(row=0, column=0, sticky="w", padx=5)
-        self.from_entry = tk.Entry(master, width=50)
-        self.from_entry.grid(row=0, column=1, sticky="w", pady=10)
+        # Define labels
+        Label(window, text="From:").grid(row=0)
+        Label(window, text="Password:").grid(row=1)
+        Label(window, text="To:").grid(row=2)
+        Label(window, text="Subject:").grid(row=3)
+        Label(window, text="Message:").grid(row=4)
 
-        self.pass_label = tk.Label(master, text="App Password:       ", background="lightgray")
-        self.pass_label.grid(row=1, column=0, sticky="w", padx=5)
-        self.pass_entry = tk.Entry(master, width=50, show="*")
-        self.pass_entry.grid(row=1, column=1, sticky="w", pady=10)
+        # Define entries
+        self.from_entry = Entry(window)
+        self.from_entry.grid(row=0, column=1)
 
-        self.to_label = tk.Label(master, text="To:        ", background="lightgray")
-        self.to_label.grid(row=2, column=0, sticky="w", padx=5)
-        self.to_entry = tk.Entry(master, width=50)
-        self.to_entry.grid(row=2, column=1, sticky="w", pady=10)
+        self.pass_entry = Entry(window, show="*")
+        self.pass_entry.grid(row=1, column=1)
 
-        self.subject_label = tk.Label(master, text="Subject:     ", background="lightgray")
-        self.subject_label.grid(row=3, column=0, sticky="w", padx=5)
-        self.subject_entry = tk.Entry(master, width=50)
-        self.subject_entry.grid(row=3, column=1, sticky="w", pady=10)
+        self.to_entry = Entry(window)
+        self.to_entry.grid(row=2, column=1)
 
-        self.body_label = tk.Label(master, text="Body:     ", background="lightgray")
-        self.body_label.grid(row=4, column=0, sticky="w", padx=5)
-        self.body_text = tk.Text(master, height=6, width=50)
-        self.body_text.grid(row=4, column=1, sticky="w", pady=20)
+        self.subject_entry = Entry(window)
+        self.subject_entry.grid(row=3, column=1)
 
-        self.send_button = tk.Button(master, text="Send", command=self.send_mail, width=16,
-                                     background="Purple", foreground="White", font=8)
-        self.send_button.grid(row=5, column=0, columnspan=3, sticky="w", padx=200)
+        self.message_entry = Text(window)
+        self.message_entry.grid(row=4, column=1)
 
-    def send_mail(self):
-        # Get the email data from the UI
+        # Define button
+        Button(window, text="Send", command=self.send_email).grid(row=5, column=1)
+
+    def send_email(self):
+        # Get the email details
         from_address = self.from_entry.get()
-        app_password = self.pass_entry.get()
+        password = self.pass_entry.get()
         to_address = self.to_entry.get()
         subject = self.subject_entry.get()
-        body = self.body_text.get("1.0", tk.END)
+        message = self.message_entry.get("1.0", END)
 
-        # Connect to the SMTP server
-        smtp_server = "smtp.gmail.com"
-        smtp_port = 587
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(from_address, app_password)
-
-        # Create the email message
-        message = f"Subject: {subject}\n\n{body}"
+        # Create the email
+        email = f"Subject: {subject}\n\n{message}"
 
         # Send the email
-        server.sendmail(from_address, to_address, message)
-
-        # Server clean up
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(from_address, password)
+        server.sendmail(from_address, to_address, email)
         server.quit()
-        self.master.destroy()
 
-root = tk.Tk()
-mail_app = MailApp(root)
-root.geometry("550x350")
-root.mainloop()
+        # Clear the entries
+        self.from_entry.delete(0, END)
+        self.pass_entry.delete(0, END)
+        self.to_entry.delete(0, END)
+        self.subject_entry.delete(0, END)
+        self.message_entry.delete("1.0", END)
+
+window = Tk()
+EmailClient(window)
+window.mainloop()
